@@ -5,7 +5,7 @@ import org.MiniWallet.SortStrategy.TransactionSortStrategy;
 import org.MiniWallet.enums.Ordering;
 import org.MiniWallet.model.Transaction;
 
-class AmountSortStrategy implements TransactionSortStrategy {
+public class AmountSortStrategy implements TransactionSortStrategy {
     @Override
     public void sort(List<Transaction> transactions, Ordering ordering) {
         if(ordering == Ordering.ASC){

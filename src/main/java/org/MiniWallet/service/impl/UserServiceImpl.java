@@ -20,6 +20,7 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public User registerUser(String username) {
+    System.out.println("Registering user " + username);
     User newUser = new User(username, username);
     User user = userData.getUserIdToUser().get(username);
     if(Objects.nonNull(user)){
@@ -27,6 +28,7 @@ public class UserServiceImpl implements UserService {
     }
     userData.getUserIdToUser().put(username, newUser);
     walletService.createWallet(username);
+    System.out.println("User " + username + " is registered");
     return newUser;
   }
 }

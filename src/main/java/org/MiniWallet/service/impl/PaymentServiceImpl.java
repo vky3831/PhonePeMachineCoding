@@ -30,7 +30,7 @@ public class PaymentServiceImpl implements PaymentService {
     Double payeeUpdatedBalance = payeeWallet.getBalance() + amount;
 
     int cashBack = 0;
-    if(payerUpdatedBalance == payeeUpdatedBalance){
+    if(payerUpdatedBalance.doubleValue() ==  payeeUpdatedBalance.doubleValue()){
       cashBack = 5;
     }
 

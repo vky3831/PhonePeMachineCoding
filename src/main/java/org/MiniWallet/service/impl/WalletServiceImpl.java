@@ -30,6 +30,7 @@ public class WalletServiceImpl implements WalletService {
   @Override
   public Double fetchBalance(String userId) {
     Wallet wallet = walletData.getWalletByUserId(userId);
+    System.out.println("Current Balance of " + userId + " is " + wallet.getBalance());
     return wallet.getBalance();
   }
 
@@ -44,6 +45,9 @@ public class WalletServiceImpl implements WalletService {
 
     if(Objects.nonNull(transactionSortStrategy))  transactionSortStrategy.sort(transactionList, ordering);
     if(Objects.nonNull(transactionFilterStrategy))  transactionList = transactionFilterStrategy.filter(transactionList);
+
+    System.out.println("Transaction Records of User " + userId);
+    System.out.println(transactionList);
 
     return transactionList;
   }
