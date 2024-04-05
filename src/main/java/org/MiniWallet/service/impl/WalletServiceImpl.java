@@ -34,23 +34,23 @@ public class WalletServiceImpl implements WalletService {
     return wallet.getBalance();
   }
 
-  @Override
-  public List<Transaction> getTransaction(String userId,
-      TransactionSortStrategy transactionSortStrategy, Ordering ordering,
-      TransactionFilterStrategy transactionFilterStrategy) {
 
-    Wallet wallet = walletData.getWalletByUserId(userId);
-
-    List<Transaction> transactionList = wallet.getTransactionList();
-
-    if(Objects.nonNull(transactionSortStrategy))  transactionSortStrategy.sort(transactionList, ordering);
-    if(Objects.nonNull(transactionFilterStrategy))  transactionList = transactionFilterStrategy.filter(transactionList);
-
-    System.out.println("Transaction Records of User " + userId);
-    System.out.println(transactionList);
-
-    return transactionList;
-  }
+//  public List<Transaction> getTransaction(String userId,
+//      TransactionSortStrategy transactionSortStrategy, Ordering ordering,
+//      TransactionFilterStrategy transactionFilterStrategy) {
+//
+//    Wallet wallet = walletData.getWalletByUserId(userId);
+//
+//  List<Transaction> transactionList = wallet.getTransactionList();
+//
+//    if(Objects.nonNull(transactionSortStrategy))  transactionSortStrategy.sort(transactionList, ordering);
+//    if(Objects.nonNull(transactionFilterStrategy))  transactionList = transactionFilterStrategy.filter(transactionList);
+//
+//    System.out.println("Transaction Records of User " + userId);
+//    System.out.println(transactionList);
+//
+//    return transactionList;
+//  }
 
   public Wallet getWalletByUserId(String userId){
     return walletData.getWalletByUserId(userId);

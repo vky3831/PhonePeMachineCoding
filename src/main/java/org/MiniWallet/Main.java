@@ -2,6 +2,7 @@ package org.MiniWallet;
 
 import org.MiniWallet.FilterStrategy.TransactionFilterStrategyImpl.TransactionTypeFilterStrategy;
 import org.MiniWallet.SortStrategy.TransactionSortStrategyImpl.AmountSortStrategy;
+import org.MiniWallet.datastore.PaymentData;
 import org.MiniWallet.datastore.UserData;
 import org.MiniWallet.datastore.WalletData;
 import org.MiniWallet.enums.Ordering;
@@ -20,10 +21,11 @@ public class Main {
   public static void main(String[] args) {
     UserData userData = new UserData();
     WalletData walletData = new WalletData();
+    PaymentData paymentData = new PaymentData();
 
     WalletService walletService = new WalletServiceImpl(walletData);
     UserService userService = new UserServiceImpl(userData, walletService);
-    PaymentService paymentService = new PaymentServiceImpl(walletService);
+    PaymentService paymentService = new PaymentServiceImpl(paymentData, walletService);
 
     userService.registerUser("Vikash");
     userService.registerUser("Atul");
@@ -32,7 +34,7 @@ public class Main {
     walletService.fetchBalance("Vikash");
     paymentService.topUpWallet("Vikash", 100.0, PaymentMode.CREDIT_CARD);
 
-    walletService.getTransaction("Vikash", null, null, null);
+    paymentService.getTransaction("Vikash", null, null, null);
     walletService.fetchBalance("Vikash");
 
     paymentService.payment("Vikash", "Hari", 55.0, PaymentMode.UPI);
@@ -40,11 +42,11 @@ public class Main {
     walletService.fetchBalance("Vikash");
     walletService.fetchBalance("Hari");
 
-    walletService.getTransaction("Vikash", null, null, null);
-    walletService.getTransaction("Hari", null, null, null);
+    paymentService.getTransaction("Vikash", null, null, null);
+    paymentService.getTransaction("Hari", null, null, null);
 
 
-    walletService.getTransaction("Vikash", new AmountSortStrategy(), Ordering.DESC, new TransactionTypeFilterStrategy(
+    paymentService.getTransaction("Vikash", new AmountSortStrategy(), Ordering.DESC, new TransactionTypeFilterStrategy(
         TransactionType.DEBIT));
   }
 }

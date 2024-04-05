@@ -11,7 +11,7 @@ import org.MiniWallet.model.Wallet;
 public interface WalletService {
   Wallet createWallet(String userId);
   Double fetchBalance(String userId);
-  List<Transaction> getTransaction(String userId, TransactionSortStrategy transactionSortStrategy, Ordering ordering,TransactionFilterStrategy transactionFilterStrategy);
+//  List<Transaction> getTransaction(String userId, TransactionSortStrategy transactionSortStrategy, Ordering ordering,TransactionFilterStrategy transactionFilterStrategy);
 
   Wallet getWalletByUserId(String userId);
 }

@@ -4,8 +4,15 @@ import static java.time.Instant.now;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
+import org.MiniWallet.FilterStrategy.TransactionFilterStrategy;
+import org.MiniWallet.SortStrategy.TransactionSortStrategy;
+import org.MiniWallet.datastore.PaymentData;
 import org.MiniWallet.datastore.WalletData;
+import org.MiniWallet.enums.Ordering;
 import org.MiniWallet.enums.PaymentMode;
 import org.MiniWallet.enums.TransactionType;
 import org.MiniWallet.model.Transaction;
@@ -16,8 +23,10 @@ import org.MiniWallet.service.WalletService;
 public class PaymentServiceImpl implements PaymentService {
 
   private WalletService walletService;
+  private PaymentData paymentData;
 
-  public  PaymentServiceImpl(WalletService walletService){
+  public  PaymentServiceImpl(PaymentData paymentData, WalletService walletService){
+    this.paymentData = paymentData;
     this.walletService = walletService;
   }
 
@@ -40,24 +49,30 @@ public class PaymentServiceImpl implements PaymentService {
 
     Transaction debit = new Transaction(UUID.randomUUID().toString(), payer, payee, amount, TransactionType.DEBIT,
         new Timestamp(System.currentTimeMillis()), paymentMode);
-    payerWallet.getTransactionList().add(debit);
+    appendTransactionToUser(payer, debit);
 
     Transaction credit = new Transaction(UUID.randomUUID().toString(), payer, payee, amount, TransactionType.CREDIT,
         new Timestamp(System.currentTimeMillis()), paymentMode);
-    payeeWallet.getTransactionList().add(credit);
+    appendTransactionToUser(payee, credit);
 
     if(cashBack != 0){
 
-      Transaction creditCashbackToPayer = new Transaction(UUID.randomUUID().toString(), "CashBack", payer, amount, TransactionType.CREDIT,
+      Transaction creditCashbackToPayer = new Transaction(UUID.randomUUID().toString(), "CashBack", payer, cashBack, TransactionType.CREDIT,
           new Timestamp(System.currentTimeMillis()), PaymentMode.CASH_BACK);
-      payeeWallet.getTransactionList().add(creditCashbackToPayer);
+      appendTransactionToUser(payer, creditCashbackToPayer);
 
-      Transaction  creditCashbackToPayee = new Transaction(UUID.randomUUID().toString(), "CashBack", payee, amount, TransactionType.CREDIT,
+      Transaction  creditCashbackToPayee = new Transaction(UUID.randomUUID().toString(), "CashBack", payee, cashBack, TransactionType.CREDIT,
           new Timestamp(System.currentTimeMillis()), PaymentMode.CASH_BACK);
-      payeeWallet.getTransactionList().add(creditCashbackToPayee);
+      appendTransactionToUser(payee, creditCashbackToPayee);
     }
 
     return debit;
+  }
+
+  private void appendTransactionToUser(String payer, Transaction debit) {
+    List<Transaction> transactionList = paymentData.getUserIdToTransactionList().getOrDefault(payer, new ArrayList<>());
+    transactionList.add(debit);
+    paymentData.getUserIdToTransactionList().put(payer, transactionList);
   }
 
   @Override
@@ -71,14 +86,30 @@ public class PaymentServiceImpl implements PaymentService {
 
     Transaction transaction = new Transaction(UUID.randomUUID().toString(), userId, wallet.getWalletId(), amount, TransactionType.CREDIT,
         new Timestamp(System.currentTimeMillis()), paymentMode);
+    appendTransactionToUser(userId, transaction);
 
-    wallet.getTransactionList().add(transaction);
     if(cashBack != 0){
       Transaction cashBackTransaction = new Transaction(UUID.randomUUID().toString(), "CashBack", userId, cashBack, TransactionType.CREDIT,
           new Timestamp(System.currentTimeMillis()), PaymentMode.CASH_BACK);
-      wallet.getTransactionList().add(cashBackTransaction);
+      appendTransactionToUser(userId, cashBackTransaction);
     }
 
     return transaction;
+  }
+
+  @Override
+  public List<Transaction> getTransaction(String userId,
+      TransactionSortStrategy transactionSortStrategy, Ordering ordering,
+      TransactionFilterStrategy transactionFilterStrategy) {
+
+    List<Transaction> transactionList = paymentData.getUserIdToTransactionList().getOrDefault(userId, new ArrayList<>());
+
+    if(Objects.nonNull(transactionSortStrategy))  transactionSortStrategy.sort(transactionList, ordering);
+    if(Objects.nonNull(transactionFilterStrategy))  transactionList = transactionFilterStrategy.filter(transactionList);
+
+    System.out.println("Transaction Records of User " + userId);
+    System.out.println(transactionList);
+
+    return transactionList;
   }
 }
