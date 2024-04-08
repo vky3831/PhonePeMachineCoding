@@ -9,5 +9,5 @@ import lombok.Data;
 public class Wallet {
   String walletId;
   Double balance;
-  List<Transaction> transactionList;
+//  List<Transaction> transactionList;
 }

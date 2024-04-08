@@ -3,7 +3,6 @@ package org.MiniWallet.service.impl;
 import static java.time.Instant.now;
 
 import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -11,21 +10,20 @@ import java.util.UUID;
 import org.MiniWallet.FilterStrategy.TransactionFilterStrategy;
 import org.MiniWallet.SortStrategy.TransactionSortStrategy;
 import org.MiniWallet.datastore.PaymentData;
-import org.MiniWallet.datastore.WalletData;
 import org.MiniWallet.enums.Ordering;
 import org.MiniWallet.enums.PaymentMode;
 import org.MiniWallet.enums.TransactionType;
 import org.MiniWallet.model.Transaction;
 import org.MiniWallet.model.Wallet;
 import org.MiniWallet.service.PaymentService;
-import org.MiniWallet.service.WalletService;
+import org.MiniWallet.service.WalletServiceInternal;
 
 public class PaymentServiceImpl implements PaymentService {
 
-  private WalletService walletService;
+  private WalletServiceInternal walletService;
   private PaymentData paymentData;
 
-  public  PaymentServiceImpl(PaymentData paymentData, WalletService walletService){
+  public  PaymentServiceImpl(PaymentData paymentData, WalletServiceInternal walletService){
     this.paymentData = paymentData;
     this.walletService = walletService;
   }
@@ -42,7 +40,7 @@ public class PaymentServiceImpl implements PaymentService {
     if(payerUpdatedBalance.doubleValue() ==  payeeUpdatedBalance.doubleValue()){
       cashBack = 5;
     }
-
+if(payerUpdatedBalance < 0) throw new RuntimeException("Insufficient Balance");
     payerWallet.setBalance(payerUpdatedBalance + cashBack);
     payeeWallet.setBalance(payeeUpdatedBalance + cashBack);
 
@@ -79,12 +77,12 @@ public class PaymentServiceImpl implements PaymentService {
   public Transaction topUpWallet(String userId, Double amount, PaymentMode paymentMode) {
     Wallet wallet = walletService.getWalletByUserId(userId);
     int cashBack = 0;
-    if(amount >= 100 && wallet.getTransactionList().isEmpty()){
+    if(amount >= 100 && paymentData.getUserIdToTransactionList().getOrDefault(userId, new ArrayList<>()).isEmpty()){
       cashBack = 10;
     }
     wallet.setBalance(wallet.getBalance() + amount +cashBack);
 
-    Transaction transaction = new Transaction(UUID.randomUUID().toString(), userId, wallet.getWalletId(), amount, TransactionType.CREDIT,
+    Transaction transaction = new Transaction(UUID.randomUUID().toString(), userId, userId, amount, TransactionType.TOP_UP,
         new Timestamp(System.currentTimeMillis()), paymentMode);
     appendTransactionToUser(userId, transaction);
 
@@ -100,12 +98,16 @@ public class PaymentServiceImpl implements PaymentService {
   @Override
   public List<Transaction> getTransaction(String userId,
       TransactionSortStrategy transactionSortStrategy, Ordering ordering,
-      TransactionFilterStrategy transactionFilterStrategy) {
+      List<TransactionFilterStrategy> transactionFilterStrategies) {
 
     List<Transaction> transactionList = paymentData.getUserIdToTransactionList().getOrDefault(userId, new ArrayList<>());
 
     if(Objects.nonNull(transactionSortStrategy))  transactionSortStrategy.sort(transactionList, ordering);
-    if(Objects.nonNull(transactionFilterStrategy))  transactionList = transactionFilterStrategy.filter(transactionList);
+    if(Objects.nonNull(transactionFilterStrategies)){
+      for(TransactionFilterStrategy filterStrategy: transactionFilterStrategies){
+        transactionList = filterStrategy.filter(transactionList);
+      }
+    }
 
     System.out.println("Transaction Records of User " + userId);
     System.out.println(transactionList);

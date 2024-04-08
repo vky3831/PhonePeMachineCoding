@@ -13,7 +13,7 @@ public interface PaymentService {
   Transaction topUpWallet(String userId, Double amount, PaymentMode paymentMode);
 
     List<Transaction> getTransaction(String userId, TransactionSortStrategy transactionSortStrategy, Ordering ordering,
-        TransactionFilterStrategy transactionFilterStrategy);
+        List<TransactionFilterStrategy> transactionFilterStrategies);
 
 
 }

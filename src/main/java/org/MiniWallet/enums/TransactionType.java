@@ -2,6 +2,7 @@ package org.MiniWallet.enums;
 
 public enum TransactionType {
   CREDIT,
-  DEBIT
+  DEBIT,
+  TOP_UP
 
 }

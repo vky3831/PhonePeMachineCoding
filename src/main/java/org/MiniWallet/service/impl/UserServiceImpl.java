@@ -5,15 +5,15 @@ import org.MiniWallet.datastore.UserData;
 import org.MiniWallet.exceptions.UserAlreadyExist;
 import org.MiniWallet.model.User;
 import org.MiniWallet.service.UserService;
-import org.MiniWallet.service.WalletService;
+import org.MiniWallet.service.WalletServiceInternal;
 
 public class UserServiceImpl implements UserService {
 
   private UserData userData;
 
-  private WalletService walletService;
+  private WalletServiceInternal walletService;
 
-  public UserServiceImpl(UserData userData, WalletService walletService){
+  public UserServiceImpl(UserData userData, WalletServiceInternal walletService){
     this.userData = userData;
     this.walletService = walletService;
   }

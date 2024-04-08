@@ -1,5 +1,6 @@
 package org.MiniWallet;
 
+import java.util.Arrays;
 import org.MiniWallet.FilterStrategy.TransactionFilterStrategyImpl.TransactionTypeFilterStrategy;
 import org.MiniWallet.SortStrategy.TransactionSortStrategyImpl.AmountSortStrategy;
 import org.MiniWallet.datastore.PaymentData;
@@ -8,13 +9,14 @@ import org.MiniWallet.datastore.WalletData;
 import org.MiniWallet.enums.Ordering;
 import org.MiniWallet.enums.PaymentMode;
 import org.MiniWallet.enums.TransactionType;
-import org.MiniWallet.model.Wallet;
 import org.MiniWallet.service.PaymentService;
 import org.MiniWallet.service.UserService;
-import org.MiniWallet.service.WalletService;
+import org.MiniWallet.service.WalletServiceClient;
+import org.MiniWallet.service.WalletServiceInternal;
 import org.MiniWallet.service.impl.PaymentServiceImpl;
 import org.MiniWallet.service.impl.UserServiceImpl;
-import org.MiniWallet.service.impl.WalletServiceImpl;
+import org.MiniWallet.service.impl.WalletServiceClientImpl;
+import org.MiniWallet.service.impl.WalletServiceInternalImpl;
 
 public class Main {
 
@@ -23,9 +25,10 @@ public class Main {
     WalletData walletData = new WalletData();
     PaymentData paymentData = new PaymentData();
 
-    WalletService walletService = new WalletServiceImpl(walletData);
-    UserService userService = new UserServiceImpl(userData, walletService);
-    PaymentService paymentService = new PaymentServiceImpl(paymentData, walletService);
+    WalletServiceClient walletService = new WalletServiceClientImpl(walletData);
+    WalletServiceInternal walletServiceInternal = new WalletServiceInternalImpl(walletData);
+    UserService userService = new UserServiceImpl(userData, walletServiceInternal);
+    PaymentService paymentService = new PaymentServiceImpl(paymentData, walletServiceInternal);
 
     userService.registerUser("Vikash");
     userService.registerUser("Atul");
@@ -46,7 +49,7 @@ public class Main {
     paymentService.getTransaction("Hari", null, null, null);
 
 
-    paymentService.getTransaction("Vikash", new AmountSortStrategy(), Ordering.DESC, new TransactionTypeFilterStrategy(
-        TransactionType.DEBIT));
+    paymentService.getTransaction("Vikash", new AmountSortStrategy(), Ordering.ASC, Arrays.asList(new TransactionTypeFilterStrategy(
+        TransactionType.TOP_UP)));
   }
 }
