@@ -36,9 +36,9 @@ public class PaymentServiceImpl implements PaymentService {
     Double payerUpdatedBalance = payerWallet.getBalance() - amount;
     Double payeeUpdatedBalance = payeeWallet.getBalance() + amount;
 
-    int cashBack = 0;
+    double cashBack = 0;
     if(payerUpdatedBalance.doubleValue() ==  payeeUpdatedBalance.doubleValue()){
-      cashBack = 5;
+      cashBack = (amount * 5)/100;
     }
 if(payerUpdatedBalance < 0) throw new RuntimeException("Insufficient Balance");
     payerWallet.setBalance(payerUpdatedBalance + cashBack);
@@ -76,9 +76,9 @@ if(payerUpdatedBalance < 0) throw new RuntimeException("Insufficient Balance");
   @Override
   public Transaction topUpWallet(String userId, Double amount, PaymentMode paymentMode) {
     Wallet wallet = walletService.getWalletByUserId(userId);
-    int cashBack = 0;
+    double cashBack = 0;
     if(amount >= 100 && paymentData.getUserIdToTransactionList().getOrDefault(userId, new ArrayList<>()).isEmpty()){
-      cashBack = 10;
+      cashBack = (amount * 10)/100;
     }
     wallet.setBalance(wallet.getBalance() + amount +cashBack);
 
